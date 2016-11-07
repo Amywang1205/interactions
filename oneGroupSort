@@ -111,10 +111,9 @@
 							console.log('大')
 						}else if(x > minL && x < maxL){
 							var
-								num = Math.round(x / itemW);
-							up.insertBefore(obj,upItems[num - 1]);
+								num = Math.round((x + itemW/2 - minL) / itemW);
+							up.insertBefore(obj,upItems[num]);
 							changePosition();
-							console.log(x)
 						}						
 					}else{
 						changePosition();
