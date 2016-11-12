@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			ul{
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			.wrap{
+				width: 600px;
+				margin: 100px auto;
+			}
+			.up,
+			.down{
+				height:60px;
+				margin-bottom: 50px;
+			}
+			.item,
+			.moving{
+				width: 100px;
+				height: 60px;
+			}
+			.item{
+				float:left;
+				background-color: pink;
+				box-sizing: border-box;
+				margin-left: 10px;
+			}
+			.item.draging{
+				border:1px dashed #333;
+				background-color: #fff;
+			}
+			.item.selected{
+				background-color: #f1f1f1;
+				border-color: #f1f1f1;
+			}
+			.drag_box{
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				background-color:paleturquoise;
+				display: none;
+			}
+			.submenu{
+				display: none;
+			}
+		</style>
+		<script src="jquery-3.1.0.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+		<section class="wrap">
+			<ul class="up">
+				<li class="item">1</li>
+				<li class="item">2</li>
+				<li class="item">3</li>
+				<li class="item">
+					<span class="txt">4</span>
+					<ul class="submenu">
+						<li>1</li>
+						<li>2</li>
+						<li>3</li>
+					</ul>
+				</li>
+			</ul>
+			<ul class="down">
+				<li class="item"></li>
+			</ul>
+			<div class="drag_box"></div>
+		</section>
+	</body>
+	<script>
+		var 
+			wrap = $('.wrap'),
+			up = $('.up'),
+			down = $('.down'),
+			upItems = $('.up .item'),
+			dragBox = $('.drag_box'),
+			isDown = false,
+			isDraging = false; //是否处于拖拽状态，false为不是，true为是
+		
+		upItems.on('mousedown',upItemsDown);
+		upItems.on('mouseup',upItemsUp);
+		$(document).on('mouseup',docUp);
+		$(document).on('mousemove',docMove);
+		function upItemsUp(){
+			$(this).find('.submenu').toggle();
+			isDown = false;
+			isDraging = false;
+		}
+		function upItemsDown(){
+			isDown = true;	
+		}
+		function docMove(e){
+			if(!isDown) return;
+			isDraging = true;
+			console.log('docMove');
+			dragBox
+			.css({
+				left: e.pageX,
+				top: e.pageY
+			})
+			.show();
+		}
+		function dragBoxUp(){
+			isDraging = false;
+		}
+		function docUp(){
+			isDraging = false;
+			isDown = false;
+		}
+		$(document).on('mousedown',function(){
+			return false;
+		});
+	</script>
+</html>
