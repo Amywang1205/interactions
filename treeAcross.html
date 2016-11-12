@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			body{
+				margin: 0px;
+			}
+			ul{
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+			.wrap{
+				position: relative;
+				top: 200px;
+			}
+			.item{
+				position: relative;	
+				margin-bottom: 10px;	
+			}
+			.title{
+				width: 100px;
+				height: 60px;
+				border-radius: 20px;
+				background-color: pink;
+			}
+			.list{
+				position: absolute;
+				left: 110px;
+				top: 0px;
+			}
+			.menu{
+				width: 100px;
+				background-color: paleturquoise;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				display: none;
+				font-size: 12px;
+				padding: 10px;
+				border-radius: 10px;
+				cursor: pointer;
+			}
+			.menu li{
+				border-bottom: 1px dashed #fff;
+				line-height: 20px;
+			}
+			.menu:last-child{
+				border-bottom: none;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="wrap">
+			<ul class="list">
+				<li class="item">
+					<div class="title"></div>
+					<ul class="list">
+						<!--<li class="item">
+							<div class="title"></div>
+						</li>
+						<li class="item">
+							<div class="title"></div>
+						</li>-->
+					</ul>
+				</li>
+			</ul>
+		</section>
+		<ul class="menu">
+			<li class="add">新增子节点</li>
+			<li class="remove">删除当前节点</li>
+		</ul>
+	</body>
+	<script type="text/javascript">	
+		setListPosition();	
+		addTitleDb();
+		function setListPosition(){
+			var 
+				lists = document.querySelectorAll('.list'),
+				i = 0,
+				len = lists.length;
+			for(;i < len;i ++){		
+				var childLength = lists[i].children.length - 1;
+				lists[i].style.top = (-35 * childLength) + 'px';
+			}
+		}
+		function addTitleDb(){
+			var 
+				i = 0,
+				titles = document.querySelectorAll('.title'),
+				len = titles.length;
+			for(;i < len;i ++){
+				titles[i].addEventListener('dblclick',function(ev){
+					addNode(this.nextElementSibling);
+					ev.stopPropagation();
+				});
+			}
+		}
+		function addNode(ele){
+			console.log(1);
+			var 
+				newEle = document.createElement('li');
+				newEle.className = 'item';
+				newEle.innerHTML = '<div class="title"></div>'
+							+'<ul class="list"></ul>';			
+			ele.appendChild(newEle);
+			setListPosition();
+			addTitleDb();
+		}
+	</script>
+</html>

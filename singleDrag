@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#up{
+				width: 100px;
+				height: 100px;
+				background-color: red;
+				position: absolute;
+				left: 0;
+				top: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="up"></div>
+	</body>
+	<script type="text/javascript">
+		var 
+			el = document.getElementById("up");
+		//阻止浏览器的默认行为
+		document.addEventListener('mousedown',function(ev){
+			ev.preventDefault();
+		})
+		drag(el);
+		function drag(obj){
+			obj.addEventListener('mousedown',function(ev){
+				var
+					disX = ev.pageX - obj.offsetLeft,
+					disY = ev.pageY - obj.offsetTop;
+				document.addEventListener('mousemove',docMove);
+				document.addEventListener('mouseup',docUp);
+				function docMove(ev){
+					obj.style.cssText = 'left:' + (ev.pageX - disX) + 'px;top:' + (ev.pageY - disY) + 'px;';
+				}
+				function docUp(ev){
+					document.removeEventListener('mousemove',docMove);
+				}
+			})
+		}	
+	</script>
+</html>

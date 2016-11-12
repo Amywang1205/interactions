@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>一组元素</title>
+		<style>
+			ul{
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+			ul:after{
+				content:"";
+				display: block;
+				clear: both;
+			}
+			.wrap{
+				width: 600px;
+				margin: 100px auto;
+			}
+			.item{
+				float: left;
+				width: 100px;
+				height: 60px;
+				background-color: red;
+				margin-right: 10px;
+				font-size: 32px;
+				line-height: 60px;
+				text-align: center;
+			}
+			.draging{
+				background-color: paleturquoise;
+				z-index: 10;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="wrap">
+			<ul id="up">
+				<li class="item">1</li>
+				<li class="item">2</li>
+				<li class="item">3</li>
+				<li class="item">4</li>
+				<li class="item">5</li>
+			</ul>
+		</section>	
+	</body>
+	<script>
+		var 
+			up = document.getElementById("up"),
+			upItems = up.children,
+			itemW = upItems[0].offsetWidth,
+			itemH = upItems[0].offsetHeight,
+			elesLen = upItems.length,
+			attrs = {};
+		//阻止浏览器的默认行为
+		document.addEventListener('mousedown',function(ev){
+			ev.preventDefault();
+		})
+		//把浮动布局转换成定位布局
+		toAbsoulte(upItems);
+		//获取left和top的最大最小值
+		var
+			minL = attrs[0].left,
+			maxL = attrs[elesLen-1].left,
+			minT = attrs[0].top,
+			maxT = minT + itemH;
+		for(let i = 0, len = upItems.length;i < len;i ++){
+			upItems[i].index = i;
+			drag(upItems[i]);
+		}
+		function toAbsoulte(eles){
+			var
+				len = eles.length;
+			for(let i = 0;i < len;i ++){
+				attrs[i] = {
+					left : eles[i].offsetLeft,
+					top: eles[i].offsetTop
+				};
+			}
+			for(let i = 0;i < len;i++){
+				eles[i].style.position = 'absolute';
+				eles[i].style.left = attrs[i].left + 'px';
+				eles[i].style.top = attrs[i].top + 'px';
+			}
+		}
+		function drag(obj){
+			obj.addEventListener('mousedown',function(ev){
+				var
+					disX = ev.pageX - obj.offsetLeft,
+					disY = ev.pageY - obj.offsetTop;
+				document.addEventListener('mousemove',docMove);
+				document.addEventListener('mouseup',docUp);
+				function docMove(ev){
+					obj.classList.add('draging');
+					obj.style.left = (ev.pageX - disX) + 'px';
+					obj.style.top = (ev.pageY - disY) + 'px';
+				}
+				function docUp(){
+					var
+						x = obj.offsetLeft,
+						y = obj.offsetTop;
+					if((y + itemH) > minT && y < maxT){
+						if(x < minL){
+							up.insertBefore(obj,up.firstElementChild);
+							changePosition();
+							console.log('小')
+						}else if(x > maxL){
+							up.appendChild(obj);
+							changePosition();
+							console.log('大')
+						}else if(x > minL && x < maxL){
+							var
+								num = Math.round((x + itemW/2 - minL) / itemW);
+							up.insertBefore(obj,upItems[num]);
+							changePosition();
+						}						
+					}else{
+						changePosition();
+					}
+					obj.classList.remove('draging');
+					document.removeEventListener('mousemove',docMove);
+					document.removeEventListener('mouseup',docUp);
+				}
+			})
+		}
+		function changePosition(){
+			var i = 0;
+			for(;i < elesLen;i ++){
+				upItems[i].style.left = attrs[i].left + 'px';
+				upItems[i].style.top = minT + 'px';
+			}
+		}
+	</script>
+</html>
