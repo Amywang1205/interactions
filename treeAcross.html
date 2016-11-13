@@ -1,113 +1,150 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
 	<head>
-		<meta charset="UTF-8">
-		<title></title>
-		<style>
-			body{
-				margin: 0px;
-			}
-			ul{
-				padding: 0;
-				margin: 0;
-				list-style: none;
-			}
+		<meta charset="utf-8"/>
+		<title>横向树结构</title>
+		<style type="text/css">
 			.wrap{
-				position: relative;
-				top: 200px;
+				width: 900px;				
+				position: relative;			
+				/*height: 300px;*/
+			}
+			.content{
+				height: 300px;
+				width: 900px;
+				margin: 100px auto;
+				border:1px solid #333;
 			}
 			.item{
-				position: relative;	
-				margin-bottom: 10px;	
-			}
-			.title{
 				width: 100px;
 				height: 60px;
-				border-radius: 20px;
 				background-color: pink;
-			}
-			.list{
-				position: absolute;
-				left: 110px;
-				top: 0px;
-			}
-			.menu{
-				width: 100px;
-				background-color: paleturquoise;
-				position: absolute;
-				left: 0px;
-				top: 0px;
-				display: none;
-				font-size: 12px;
-				padding: 10px;
 				border-radius: 10px;
-				cursor: pointer;
-			}
-			.menu li{
-				border-bottom: 1px dashed #fff;
-				line-height: 20px;
-			}
-			.menu:last-child{
-				border-bottom: none;
+				position: absolute;
+				line-height: 60px;
+				text-align: center;
 			}
 		</style>
 	</head>
 	<body>
-		<section class="wrap">
-			<ul class="list">
-				<li class="item">
-					<div class="title"></div>
-					<ul class="list">
-						<!--<li class="item">
-							<div class="title"></div>
-						</li>
-						<li class="item">
-							<div class="title"></div>
-						</li>-->
-					</ul>
-				</li>
-			</ul>
+		<section class="content">
+			<section class="wrap"></section>
 		</section>
-		<ul class="menu">
-			<li class="add">新增子节点</li>
-			<li class="remove">删除当前节点</li>
-		</ul>
 	</body>
-	<script type="text/javascript">	
-		setListPosition();	
-		addTitleDb();
-		function setListPosition(){
-			var 
-				lists = document.querySelectorAll('.list'),
-				i = 0,
-				len = lists.length;
-			for(;i < len;i ++){		
-				var childLength = lists[i].children.length - 1;
-				lists[i].style.top = (-35 * childLength) + 'px';
+	<script type="text/javascript">
+		var
+			datas = {
+				content: [
+				{id:1},
+				{id:2,pid:1},
+				{id:3,pid:1},
+				{id:4,pid:2},
+				{id:5,pid:2},
+				{id:6,pid:3},
+				{id:7,pid:5}],
+				rootId:1,
+				length: 7
+			};
+		var 
+			maxLevel = 0,
+			wrap = document.querySelector('.wrap'),
+			newData = handleData(datas.rootId);
+		newData.push({id: 1,level: 0});
+		createEles(newData);
+		var 
+			arrLevel = [];
+		sameLevel();
+		for(var i = 1;i <= maxLevel;i ++){
+			arrLevel.push(sameLevel(i));
+		}
+		var max = Math.max.apply(null, arrLevel);
+		function createEles(data){
+			var str = '';
+			for(var i = 0;i < data.length;i++){
+				str += '<div class="item" data-id='+ data[i].id +' style="left:'+ data[i].level*150 +'px;">'+ data[i].id +'</div>';
+			}
+			wrap.innerHTML = str;
+		} 
+		var 
+			h = max * 60 + 30;
+		wrap.style.height = h + 'px';
+		setPosition();
+		function setPosition(){
+			var
+				firstEle = getEle(datas.rootId);		
+			firstEle.style.top = (max * 100 - 60)/2 + 'px';
+			wrap.style.top = (300 - h)/2 + 'px';
+		}
+		fn();
+		function fn(id){
+			var
+				id = id || 1,
+				children = getChild(id),
+				parentEle = getEle(id),
+				len = children.length;
+			parentEle.style.top = parentEle.offsetTop - (len - 1)*25 + 'px';
+			var parentTop = parentEle.offsetTop;
+			for(var i = 0; i < len;i ++){
+				var 
+					ele = getEle(children[i].id);
+				if(len === 1){
+					ele.style.top = parentTop + 'px';
+				}else{
+					ele.style.top = parentTop - 20 * len + i * 80 + 'px';
+				}
+				if(getChild(children[i].id).length) fn(children[i].id);
 			}
 		}
-		function addTitleDb(){
+		function handleData(id,level){
+			var
+				arr = [],
+				level = level || 1,
+				children = getChild(id);
+			maxLevel = level;
+			for(var i = 0;i < children.length;i++){
+				children[i].level = level;
+				arr.push(children[i]);
+				arr = arr.concat(handleData(children[i].id,level+1));
+			}
+			return arr;
+		}
+		function getChild(id){
 			var 
-				i = 0,
-				titles = document.querySelectorAll('.title'),
-				len = titles.length;
-			for(;i < len;i ++){
-				titles[i].addEventListener('dblclick',function(ev){
-					addNode(this.nextElementSibling);
-					ev.stopPropagation();
-				});
+				arr = [];
+			for(var i = 0;i < datas.length;i ++){
+				if(datas.content[i].pid === id) arr.push(datas.content[i]);
+			}
+			return arr;
+		}
+		function getItem(id){
+			for(var i = 0;i < datas.length;i ++){
+				if(datas.content[i].id === id) return datas.content[i];
 			}
 		}
-		function addNode(ele){
-			console.log(1);
+		function getEle(id){
+			var
+				items = wrap.querySelectorAll('.item');
+			for(var i = 0;i < datas.length;i ++){
+				var
+				 	dataId = items[i].getAttribute('data-id');
+				if(parseInt(dataId) === id) return items[i];
+			}
+		}
+		function getParent(id){
 			var 
-				newEle = document.createElement('li');
-				newEle.className = 'item';
-				newEle.innerHTML = '<div class="title"></div>'
-							+'<ul class="list"></ul>';			
-			ele.appendChild(newEle);
-			setListPosition();
-			addTitleDb();
+				pid = getItem(id).pid;
+			for(var i = 0;i < datas.length;i ++){
+				if(datas.content[i].pid === pid) return datas.content[i];
+			}
+		}
+		function sameLevel(level){
+			var 
+				n = 0,
+				level = level || 1;
+			for(var i = 0;i < datas.length;i++){
+				if(newData[i].level === level) n ++;
+			}
+			return n;
 		}
 	</script>
 </html>

@@ -65,20 +65,20 @@
 			maxL = attrs[elesLen-1].left,
 			minT = attrs[0].top,
 			maxT = minT + itemH;
-		for(let i = 0, len = upItems.length;i < len;i ++){
+		for(var i = 0, len = upItems.length;i < len;i ++){
 			upItems[i].index = i;
 			drag(upItems[i]);
 		}
 		function toAbsoulte(eles){
 			var
 				len = eles.length;
-			for(let i = 0;i < len;i ++){
+			for(var i = 0;i < len;i ++){
 				attrs[i] = {
 					left : eles[i].offsetLeft,
 					top: eles[i].offsetTop
 				};
 			}
-			for(let i = 0;i < len;i++){
+			for(var i = 0;i < len;i++){
 				eles[i].style.position = 'absolute';
 				eles[i].style.left = attrs[i].left + 'px';
 				eles[i].style.top = attrs[i].top + 'px';
