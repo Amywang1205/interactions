@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			body{
+				margin: 0px;
+			}
+			ul{
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+			.clearfix:after{
+				content: "";
+				display: block;
+				clear: both;
+			}
+			.up{
+				margin-bottom: 100px;
+			}
+			.up li{
+				float: left;
+				margin-right: 20px;
+				cursor: pointer;
+			}
+			.wrap{
+				position: relative;
+				top: 200px;
+			}
+			.item{
+				position: relative;	
+				margin-bottom: 10px;	
+			}
+			.title,
+			.up li,
+			.draging,
+			.target{
+				width: 100px;
+				height: 60px;
+				border-radius: 20px;
+				background-color: pink;
+				line-height: 60px;
+				text-align: center;
+			}
+			.list{
+				position: absolute;
+				left: 110px;
+				top: 0px;
+			}
+			.menu{
+				width: 100px;
+				background-color: paleturquoise;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				display: none;
+				font-size: 12px;
+				padding: 10px;
+				border-radius: 10px;
+				cursor: pointer;
+			}
+			.menu li{
+				border-bottom: 1px dashed #fff;
+				line-height: 20px;
+			}
+			.menu:last-child{
+				border-bottom: none;
+			}
+			.list .target,
+			.up .beDragged{
+				box-sizing: border-box;
+				background-color: #f1f1f1;
+				border:1px dashed #333;
+			}
+			.draging{
+				display: none;
+				background-color: paleturquoise;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+			}
+		</style>
+	</head>
+	<body>
+		<ul class="up clearfix">
+			<li>1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+			<li>5</li>
+			<li>6</li>
+			<li>7</li>
+		</ul>
+		<section class="wrap">
+			<ul class="list">
+				<li class="item">
+					<div class="title">0</div>
+					<ul class="list">
+					</ul>
+				</li>
+			</ul>	
+		</section>
+		<div class="draging"></div>
+	</body>
+	<script type="text/javascript">	
+		var 
+			attrs = {},
+			upItems = document.querySelectorAll('.up li'),
+			dragingEle = document.querySelector('.draging'),
+			upItemsLength = upItems.length;
+		setListPosition();	
+		addTitleDb();
+		//阻止浏览器的默认行为
+		document.addEventListener('mousedown',function(ev){
+			ev.preventDefault();
+		})
+		function setListPosition(){
+			var 
+				lists = document.querySelectorAll('.list'),
+				items = document.querySelectorAll('.list .item')
+				len = lists.length;
+			for(var i = 0;i < len;i ++){		
+				var 
+					childLength = lists[i].children.length - 1,
+					listHeight = lists[i].offsetHeight;
+				if(childLength){
+					lists[i].style.top = -(listHeight)/2 + 35 + 'px';
+				}else{
+					lists[i].style.top = 0 + 'px';
+				}
+			}
+			for(var i = 0;i < items.length;i ++){
+				var itemLength = items[i].lastElementChild.children.length;
+				if(itemLength === 1) continue;
+				items[i].style.marginBottom = 35 * itemLength + 10 + 'px';
+			}
+		}
+		function addTitleDb(){
+			var 
+				i = 0,
+				titles = document.querySelectorAll('.title'),
+				len = titles.length;
+			for(;i < len;i ++){
+				titles[i].ondblclick = function(ev){
+					addNode(this.nextElementSibling);
+					ev.stopPropagation();
+				};
+				dragUp(titles[i]);
+			}
+		}
+		function addNode(ele){
+			var 
+				newEle = document.createElement('li');
+				newEle.className = 'item';
+				newEle.innerHTML = '<div class="target"></div>'
+							+'<ul class="list"></ul>';
+			ele.appendChild(newEle);
+			setListPosition();
+		}
+		//drag area
+		//浮动布局转变为定位布局
+		toAbsoulte(upItems);
+		for(var i = 0, len = upItems.length;i < len;i ++){
+			upItems[i].index = i + 1;
+			dragDown(upItems[i]);
+		}
+		function toAbsoulte(eles){
+			var
+				len = eles.length;
+			for(var i = 0;i < len;i ++){
+				attrs[i] = {
+					left : eles[i].offsetLeft,
+					top: eles[i].offsetTop
+				};
+			}
+			for(var i = 0;i < len;i++){
+				eles[i].style.position = 'absolute';
+				eles[i].style.left = attrs[i].left + 'px';
+				eles[i].style.top = attrs[i].top + 'px';
+			}
+		}
+		function dragDown(obj){
+			var 
+				target = null;
+			obj.addEventListener('mousedown',function(ev){
+				var
+					disX = ev.pageX - obj.offsetLeft,
+					disY = ev.pageY - obj.offsetTop;
+				target = document.querySelector('.target');
+				document.addEventListener('mousemove',docMove);
+				document.addEventListener('mouseup',docUp);
+				function docMove(ev){
+					if(!target) return;
+					dragingEle.style.display = 'block';
+					dragingEle.innerHTML = obj.innerHTML;
+					obj.classList.add('beDragged');
+					// 不兼容ie9
+					dragingEle.style.left = (ev.pageX - disX) + 'px';
+					dragingEle.style.top = (ev.pageY - disY) + 'px';
+				}
+				function docUp(ev){
+					if(target){
+						var
+							//兼容ie9
+							targetRect = target.getBoundingClientRect();
+							targetX = targetRect.left,
+							targetY = targetRect.top;
+						if(ev.x > targetX && ev.x < targetX + 100 && ev.y > targetY && ev.y < targetY + 60){
+							console.log('到碗里来了');
+							target.innerHTML = dragingEle.innerHTML;
+							target.index = obj.index;
+							target.classList.add('title');
+							target.classList.remove('target');
+							addTitleDb();
+						}
+					}	
+					dragingEle.style.display = 'none';
+					obj.classList.remove('beDragged');
+					document.removeEventListener('mousemove',docMove);
+					document.removeEventListener('mouseup',docUp);			
+				}
+			})
+		}
+		function dragUp(obj){
+			obj.addEventListener('mousedown',function(ev){
+				var
+					objClient = obj.getBoundingClientRect(),
+					disX = ev.pageX - objClient.left,
+					disY = ev.pageY - objClient.top;
+				document.addEventListener('mousemove',docMove);
+				document.addEventListener('mouseup',docUp);
+				function docMove(ev){
+					dragingEle.innerHTML = obj.innerHTML;
+					obj.classList.add('target');
+					obj.classList.remove('title');
+					dragingEle.style.display = 'block';
+					// 不兼容ie9
+					dragingEle.style.left = (ev.pageX - disX) + 'px';
+					dragingEle.style.top = (ev.pageY - disY) + 'px';
+				}
+				function docUp(ev){
+					var
+						//兼容ie9
+						targetRect = obj.getBoundingClientRect();
+						targetX = targetRect.left,
+						targetY = targetRect.top;
+					if(ev.x > targetX && ev.x < targetX + 100 && ev.y > targetY && ev.y < targetY + 60){
+						obj.classList.add('title');
+						obj.classList.remove('target');
+					}else{
+						if(obj.parentElement.parentElement){
+							obj.parentElement.parentElement.removeChild(obj.parentElement);
+							setListPosition();
+						}
+					}
+					dragingEle.style.display = 'none';
+					document.removeEventListener('mousemove',docMove);
+					document.removeEventListener('mouseup',docUp);			
+				}
+			})
+		}
+	</script>
+</html>
